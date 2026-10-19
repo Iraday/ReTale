@@ -241,7 +241,7 @@ export function RoleplaySessionView(props: {
       const messages = next.messages.filter((message) => message.turn || message.script).map(normalizeMessage)
       setDetail({ ...next, messages })
       let savedMessageId: string | null = null
-      let savedLengths: { story?: number; dialogueOnly?: number } = {}
+      const savedLengths: { story?: number; dialogueOnly?: number } = {}
       try {
         savedMessageId = window.localStorage.getItem(branchStorageKey)
         const parsed = JSON.parse(window.localStorage.getItem(lengthStorageKey) ?? '{}') as unknown

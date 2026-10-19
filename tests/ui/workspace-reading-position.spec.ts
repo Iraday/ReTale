@@ -37,7 +37,10 @@ for (const mobile of [true, false]) {
       await expectChapter(id, order)
     }
     const goHome = async () => {
-      await page.getByRole('link', { name: '返回书库', exact: true }).filter({ visible: true }).click()
+      const homeLink = mobile
+        ? page.getByRole('link', { name: '返回书库', exact: true }).filter({ visible: true })
+        : page.getByTestId('workspace-chapter-nav-home')
+      await homeLink.click()
       await expect(page).toHaveURL(/\/library$/)
       await expect(page.getByRole('heading', { name: '位置记忆 A', exact: true })).toBeVisible()
     }

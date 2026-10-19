@@ -1584,7 +1584,7 @@ test('task 12 exhaustive full-stack regression and evidence', async ({ page }) =
     await page.getByTestId('future-map-track-phase-task12').click()
     await page.getByTestId(`future-map-event-${futureJumpFixtures.outlineNodeId}`).click()
     await expect(page.getByTestId('future-map-resolved-chapter')).toContainText(String(futureJumpFixtures.targetChapterNo))
-    await page.getByLabel('Optional direction').fill('Delay the truth until much later.')
+    await page.getByRole('textbox', { name: /^Optional: add one extra direction for this Future Jump/ }).fill('Delay the truth until much later.')
     await page.getByTestId('future-map-confirm').click()
     const futureJumpCreateResponse = await futureJumpCreateResponsePromise
     apiTimings.push({ label: 'future-jump-create', ms: 0, status: futureJumpCreateResponse.status() })
