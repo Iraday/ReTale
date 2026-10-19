@@ -7,6 +7,10 @@ export type Locale = (typeof SUPPORTED_LOCALES)[number]
 export type TranslationValues = Record<string, string | number>
 
 export const zhMessages = {
+  'characterPrompt.insert': '插入角色',
+  'characterPrompt.hint': '输入部分名字或 @，快速选择角色',
+  'characterPrompt.suggestions': '角色名建议',
+  'characterPrompt.keyboardHint': '↑↓ 选择 · Enter / Tab 插入 · Esc 关闭',
   ...progressZhMessages,
   "compression.title": "压缩上下文",
   "compression.description": "仅总结当前分支中用户生成的历史文本与对话；每个写作块或对话轮次计为一章。原著正文不参与压缩，已保存的历史正文仍可查看。",
@@ -1508,6 +1512,10 @@ export type TranslationKey = keyof typeof zhMessages
 type MessageDictionary = Record<TranslationKey, string>
 
 export const enMessages: MessageDictionary = {
+  'characterPrompt.insert': 'Insert character',
+  'characterPrompt.hint': 'Type part of a name or @ to choose a character',
+  'characterPrompt.suggestions': 'Character name suggestions',
+  'characterPrompt.keyboardHint': '↑↓ choose · Enter / Tab insert · Esc close',
   ...progressEnMessages,
   "compression.title": "Compress context",
   "compression.description": "Summarize generated history in this branch. Each writing block or conversation turn counts as a chapter. Original novel text is excluded; saved history remains readable.",

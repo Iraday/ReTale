@@ -175,7 +175,7 @@ describe('FutureJumpView', () => {
         return new Response(JSON.stringify(futureMapPayload), { status: 200 })
       }
       if (url === '/api/future-jump/runs/jump-run-001/revise' && init?.method === 'POST') {
-        expect(JSON.parse(String(init.body))).toEqual({ novelId: 'novel-001', userFeedback: '把救援推得更晚' })
+        expect(JSON.parse(String(init.body))).toEqual({ novelId: 'novel-001', userFeedback: '把救援交给林舟' })
         currentDetail = buildRunDetail(3, '第三版镜像桥接摘要', '第三版镜像未来正文')
         return new Response(JSON.stringify({
           runId: 'jump-run-001',
@@ -192,6 +192,7 @@ describe('FutureJumpView', () => {
 
     render(
       <FutureJumpView
+        characters={[{ name: '林舟' }]}
         novelId="novel-001"
         branchId="novel-001:main"
         runId="jump-run-001"
@@ -219,8 +220,10 @@ describe('FutureJumpView', () => {
     expect(revisionLabels[0]).toContain('第 2 版')
 
     fireEvent.change(screen.getByTestId('future-jump-feedback'), {
-      target: { value: '把救援推得更晚' },
+      target: { value: '把救援交给林' },
     })
+    fireEvent.keyDown(screen.getByTestId('future-jump-feedback'), { key: 'Enter' })
+    expect(screen.getByTestId('future-jump-feedback')).toHaveValue('把救援交给林舟')
     fireEvent.click(screen.getByTestId('future-jump-regenerate'))
 
     await waitFor(() => {

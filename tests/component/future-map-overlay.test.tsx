@@ -275,6 +275,7 @@ describe('FutureMapOverlay', () => {
 
     render(
       <FutureMapOverlay
+        characters={[{ name: '林舟', aliases: ['小舟'] }]}
         novelId="novel-001"
         branchId="novel-001:main"
         sourceContext={{
@@ -313,8 +314,10 @@ describe('FutureMapOverlay', () => {
     expect(screen.getByTestId('future-map-resolved-chapter')).toHaveTextContent('第100章 被绑走')
 
     fireEvent.change(screen.getByPlaceholderText(/可选：给这次 Future Jump 一句额外方向/), {
-      target: { value: '让救援更晚到来' },
+      target: { value: '让@小舟' },
     })
+    fireEvent.click(screen.getByRole('option', { name: '林舟 小舟' }))
+    expect(screen.getByPlaceholderText(/可选：给这次 Future Jump 一句额外方向/)).toHaveValue('让林舟')
     fireEvent.click(confirmButton)
 
     await waitFor(() => {
@@ -347,7 +350,7 @@ describe('FutureMapOverlay', () => {
       targetOutlineNodeId: 'outline_event_100',
       targetOutlineChapterId: 'outline_chapter_100_primary',
       parentTimelineNodeId: 'if-node-1',
-      userDirection: '让救援更晚到来',
+      userDirection: '让林舟',
     })
   })
 

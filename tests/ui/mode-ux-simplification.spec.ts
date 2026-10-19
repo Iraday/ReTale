@@ -685,6 +685,67 @@ for (const width of [360, 390, 430]) {
   })
 }
 
+for (const width of [390, 1280]) {
+  test(`character prompt completion preserves text and submits names at ${width}px`, async ({ page }, testInfo) => {
+    await page.setViewportSize({ width, height: 844 })
+    const characters = [
+      { id: 'lin', novelId: 'novel-001', name: '林舟', aliases: ['小舟'], role: '主角', goal: '', trait: '', note: '' },
+      { id: 'shen', novelId: 'novel-001', name: '沈月', role: '同伴', goal: '', trait: '', note: '' },
+      { id: 'other', novelId: 'novel-other', name: '其他小说角色', role: '主角', goal: '', trait: '', note: '' },
+    ]
+    await mockNovelResourceApi(page, () => ({ ...buildWorkspacePayload(), localCharacters: characters }))
+    await page.route('**/api/settings/ai', (route) => route.fulfill({ json: buildWorkspacePayload().aiSettings }))
+    await page.route('**/api/settings/preset-compat', (route) => route.fulfill({ json: createDefaultPresetCompatLibrary() }))
+    await page.route('**/api/story-timeline*', (route) => route.fulfill({ json: buildBaseTimeline() }))
+    await page.route('**/api/knowledge-view*', (route) => route.fulfill({ json: { ...buildKnowledgeViewPayload(), localCharacters: characters } }))
+    await page.route('**/api/rag/build-generation-context', (route) => route.fulfill({ json: buildGenerationContextPayload() }))
+    let instruction = ''
+    await page.route('**/api/rewrite*', (route) => {
+      if (route.request().method() === 'GET' && !new URL(route.request().url()).searchParams.has('jobId')) {
+        return route.fulfill({ json: { ok: true, job: null } })
+      }
+      if (route.request().method() === 'POST') instruction = route.request().postDataJSON().userInstruction
+      return route.fulfill({ json: { ok: true, job: buildRecoverableRewriteJob({ jobId: 'character-completion', content: '林舟与沈月离开。' }) } })
+    })
+    await page.goto('/workspace', { waitUntil: 'networkidle' })
+    await selectWholeEditorParagraph(page)
+    await page.getByTestId('workspace-chapter-rewrite-entry').click()
+    const dialog = page.getByRole('dialog', { name: '魔改 · 全章重写' })
+    const prompt = dialog.getByRole('textbox', { name: '魔改要求' })
+    await prompt.fill('让林先离开')
+    await prompt.press('ArrowLeft')
+    await prompt.press('ArrowLeft')
+    await prompt.press('ArrowLeft')
+    await expect(prompt).toHaveJSProperty('selectionStart', 2)
+    await expect(dialog.getByRole('option', { name: '林舟 小舟' })).toBeVisible()
+    await prompt.press('Tab')
+    await expect(prompt).toHaveValue('让林舟先离开')
+    await expect(prompt).toBeFocused()
+    await prompt.press('ArrowRight')
+    await prompt.press('ArrowRight')
+    await prompt.press('ArrowRight')
+    await prompt.pressSequentially('，然后@小舟')
+    await expect(dialog.getByRole('listbox')).toBeVisible()
+    await prompt.press('Escape')
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByRole('listbox')).toHaveCount(0)
+    await prompt.fill('让@')
+    await expect(dialog.getByRole('listbox', { name: '角色名建议' }).getByRole('option')).toHaveCount(2)
+    await expect(dialog.getByRole('option', { name: '其他小说角色' })).toHaveCount(0)
+    await page.screenshot({ path: testInfo.outputPath('character-name-suggestions.png') })
+    await dialog.getByRole('option', { name: '沈月' }).click()
+    await expect(prompt).toHaveValue('让沈月')
+    await expect(prompt).toBeFocused()
+    await prompt.pressSequentially('和')
+    await dialog.getByRole('button', { name: '插入角色' }).click()
+    await dialog.getByRole('option', { name: '林舟 小舟' }).click()
+    await prompt.pressSequentially('离开。')
+    await expect(prompt).toHaveValue('让沈月和林舟离开。')
+    await dialog.getByRole('button', { name: '生成版本', exact: true }).click()
+    await expect.poll(() => instruction).toBe('让沈月和林舟离开。')
+  })
+}
+
 test('simplified mode flow covers import, continue-block lineage, future-jump continue, collapsed context, and obsolete-surface absence', async ({ page }) => {
   let imported = false
   let timelineState = buildBaseTimeline()
