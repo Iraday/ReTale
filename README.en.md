@@ -2,6 +2,8 @@
 
 # ReTale
 
+**[Demo Site](https://ainitan.com)**
+
 ReTale is a novel reader and creative workspace with an AI writing assistant. Import a book, highlight a moment you want to change, and describe what you would like to happen next.
 
 Rewrite a disappointing turn, continue a story you love, or step into a character’s role for a conversation. Character relationships, world details, and passages from the book can inform your writing, while the original story and your new branches remain separately accessible.
