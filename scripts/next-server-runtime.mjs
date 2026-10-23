@@ -166,13 +166,18 @@ function ensureModeFilesystem(config) {
   }
 }
 
+// Next/Turbopack treat backslashes as part of a file name, so paths handed to Next must use forward slashes.
+function toPosixPath(value) {
+  return value.split(path.sep).join('/')
+}
+
 function ensureIsolatedTestTsconfig(config) {
   if (!config.tsconfigPath || config.tsconfigPath === 'tsconfig.json') {
     return
   }
 
   const tsconfigContents = {
-    extends: path.relative(path.dirname(path.join(ROOT, config.tsconfigPath)), path.join(ROOT, 'tsconfig.json')),
+    extends: toPosixPath(path.relative(path.dirname(path.join(ROOT, config.tsconfigPath)), path.join(ROOT, 'tsconfig.json'))),
   }
 
   fs.writeFileSync(path.join(ROOT, config.tsconfigPath), `${JSON.stringify(tsconfigContents, null, 2)}\n`)
@@ -269,8 +274,8 @@ export function runNextServer(mode, invokedAs) {
       ...process.env,
       DATABASE_URL: config.databaseUrl,
       ...(config.dataDir ? { RETALE_DATA_DIR: config.dataDir } : {}),
-      RETALE_NEXT_DIST_DIR: config.distDir,
-      RETALE_NEXT_TSCONFIG_PATH: config.tsconfigPath,
+      RETALE_NEXT_DIST_DIR: toPosixPath(config.distDir),
+      RETALE_NEXT_TSCONFIG_PATH: toPosixPath(config.tsconfigPath),
     },
   })
 
